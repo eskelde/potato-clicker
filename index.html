@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Batata Clicker 🥔</title>
+  <style>
+    :root{--bg:#0f172a;--panel:#111827;--card:#1f2937;--muted:#94a3b8;--txt:#e5e7eb;--accent:#f59e0b;--accent-2:#22c55e;--accent-3:#38bdf8;--danger:#ef4444;}
+    *{box-sizing:border-box} html,body{height:100%} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,"Helvetica Neue",Arial,"Apple Color Emoji","Segoe UI Emoji"; background:radial-gradient(1200px 700px at 20% -10%,#1e293b 0%,var(--bg) 60%); color:var(--txt);}
+    .app{display:grid; grid-template-columns:1.2fr 1fr 1fr; gap:16px; padding:16px; max-width:1200px; margin:0 auto} @media (max-width:980px){.app{grid-template-columns:1fr; padding:12px}}
+    .panel{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0)); border:1px solid rgba(255,255,255,.06); border-radius:16px; box-shadow:0 10px 25px rgba(0,0,0,.35); padding:16px;}
+    .header{display:flex; align-items:center; justify-content:space-between; gap:12px;}
+    .title{font-size:clamp(20px,3vw,28px); font-weight:800; letter-spacing:.5px}
+    .sub{color:var(--muted); font-size:13px}
+    .stats{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:12px}
+    .stat{background:var(--card); border-radius:12px; padding:12px; text-align:center;}
+    .stat .v{font-weight:800; font-size:clamp(18px,3vw,24px)}
+    .stat .k{color:var(--muted); font-size:12px}
+    .game-area{display:grid; grid-template-columns: 1fr; place-items:center; padding:12px; position:relative;}
+    .potato-btn{width:min(56vw,360px); height:min(56vw,360px); border-radius:999px; border:none; cursor:pointer; position:relative; isolation:isolate; background: radial-gradient(120px 160px at 65% 35%, rgba(0,0,0,.25), rgba(0,0,0,0) 60%), radial-gradient(90px 120px at 35% 65%, rgba(255,255,255,.08), rgba(255,255,255,0) 65%), radial-gradient(closest-side, #b45309, #92400e); box-shadow: inset 0 10px 20px rgba(0,0,0,.35), 0 20px 40px rgba(0,0,0,.45), 0 0 0 6px rgba(0,0,0,.2); color:#fff; font-size:72px; transition: transform .06s ease-out, filter .06s ease-out;}
+    .potato-btn:hover{ transform: translateY(-2px) scale(1.02)} .potato-btn:active{ transform: scale(.97)}
+    .potato-face{ position:absolute; inset:auto; left:50%; top:52%; transform:translate(-50%,-50%); font-size:64px; filter: drop-shadow(0 2px 2px rgba(0,0,0,.5)); user-select:none}
+    .floating{ position:absolute; left:50%; transform:translateX(-50%); font-weight:800; pointer-events:none; opacity:0; animation:pop .9s ease-out forwards }
+    @keyframes pop{ 0%{opacity:0; transform:translate(-50%, -8px) scale(.9)} 20%{opacity:1} 100%{opacity:0; transform:translate(-50%,-60px) scale(1)} }
+    .shop{display:flex; flex-direction:column; gap:8px;}
+    .item{display:flex; gap:12px; align-items:center; background:var(--card); border-radius:12px; padding:10px; border:1px solid rgba(255,255,255,.06)}
+    .item.lock{opacity:.6; filter:grayscale(20%)}
+    .item .icon{font-size:22px}
+    .item .meta{flex:1}
+    .item .meta .name{font-weight:700}
+    .item .meta .desc{font-size:12px; color:var(--muted)}
+    .item .meta .row{display:flex; gap:10px; font-size:12px; margin-top:4px}
+    .item button{background:var(--accent); border:none; color:#1f2937; font-weight:900; border-radius:10px; padding:8px 10px; cursor:pointer}
+    .item button:disabled{opacity:.5; cursor:not-allowed}
+    .controls{display:flex; flex-wrap:wrap; gap:8px}
+    .btn{background:#111827; color:var(--txt); border:1px solid rgba(255,255,255,.08); padding:8px 10px; border-radius:10px; cursor:pointer}
+    .btn:hover{border-color:rgba(255,255,255,.2)}
+    .ach{display:flex; flex-wrap:wrap; gap:8px}
+    .badge{background:var(--panel); border:1px dashed rgba(255,255,255,.12); border-radius:999px; padding:6px 10px; font-size:12px}
+    .log{height:140px; overflow:auto; background:var(--panel); border:1px solid rgba(255,255,255,.06); border-radius:12px; padding:8px; font-size:12px; color:var(--muted)}
+    .footer{opacity:.7; font-size:12px; text-align:center; margin-top:8px}
+    a{color:var(--accent-3)}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="panel" id="col-game">
+      <div class="header">
+        <div>
+          <div class="title">Batata Clicker <span aria-hidden>🥔</span></div>
+          <div class="sub">Clique na batata para ganhar batatas. Compre upgrades e automatize!</div>
+        </div>
+        <div class="controls" style="visibility:hidden"> <!-- hide save/export/import controls for site version -->
+          <button class="btn" id="saveBtn">💾 Salvar</button>
+          <button class="btn" id="exportBtn">⬇️ Exportar</button>
+          <button class="btn" id="importBtn">⬆️ Importar</button>
+          <button class="btn" id="resetBtn">🗑️ Reset</button>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="v" id="potatoes">0</div><div class="k">Batatas</div></div>
+        <div class="stat"><div class="v" id="rate">0/s</div><div class="k">Produção</div></div>
+        <div class="stat"><div class="v" id="perClick">+1</div><div class="k">Por clique</div></div>
+      </div>
+      <div class="game-area">
+        <button id="potatoBtn" class="potato-btn" aria-label="Colher batata"><div class="potato-face">🥔</div></button>
+        <div id="floatLayer" style="position:absolute; inset:0; pointer-events:none"></div>
+      </div>
+      <div class="ach" id="achievements"></div>
+    </section>
+    <section class="panel">
+      <h2 style="margin-top:0">Upgrades de Clique</h2>
+      <div class="shop" id="clickShop"></div>
+    </section>
+    <section class="panel">
+      <h2 style="margin-top:0">Produção Automática</h2>
+      <div class="shop" id="autoShop"></div>
+      <h3 style="margin-top:14px">Registro</h3>
+      <div id="log" class="log"></div>
+      <div class="footer">Feito com ❤️. Versão para site — sem salvar progresso.</div>
+    </section>
+  </div>
+
+  <script>
+    // core helpers and UI
+    const fmt = n => { if(!isFinite(n)) return '∞'; const abs=Math.abs(n); if(abs>=1e12)return(n/1e12).toFixed(2)+'T'; if(abs>=1e9)return(n/1e9).toFixed(2)+'B'; if(abs>=1e6)return(n/1e6).toFixed(2)+'M'; if(abs>=1e3)return Math.floor(n).toString()+'k'; return Math.floor(n).toString(); };
+    const log = msg => { const el = document.getElementById('log'); const line=document.createElement('div'); line.textContent=`[${new Date().toLocaleTimeString()}] ${msg}`; el.prepend(line); };
+
+    // state (no save)
+    const state = {
+      potatoes: 0,
+      totalPotatoes: 0,
+      perClick: 1,
+      buildings: {},
+      upgradesBought: {},
+    };
+
+    // define items (matches visual style)
+    const clickUpgrades = [
+      { id:'hoe', name:'Enxada', cost:100, desc:'Dobra o por-clique', effect:()=>{ state.perClick *= 2; } },
+      { id:'glove', name:'Luvas', cost:500, desc:'+2 por clique', effect:()=>{ state.perClick += 2; } }
+    ];
+
+    const autos = [
+      { id:'harvester', name:'Colheitadeira', base:15, cps:1, icon:'🚜', desc:'Colhe sozinho' },
+      { id:'farm', name:'Fazenda', base:100, cps:5, icon:'🌾', desc:'Produção em larga escala' },
+      { id:'plant', name:'Plantação', base:1100, cps:20, icon:'🏭', desc:'Produção industrial' }
+    ];
+
+    // UI elements
+    const potatoBtn = document.getElementById('potatoBtn');
+    const floatLayer = document.getElementById('floatLayer');
+    function renderShops(){
+      const cs = document.getElementById('clickShop'); cs.innerHTML='';
+      clickUpgrades.forEach(u=>{
+        if(state.upgradesBought[u.id]) return;
+        const div = document.createElement('div'); div.className='item';
+        div.innerHTML = `<div class="icon">⚒️</div><div class="meta"><div class="name">${u.name}</div><div class="desc">${u.desc}</div><div class="row"><div>Preço: ${fmt(u.cost)}</div></div></div><div><button ${state.potatoes>=u.cost?'':'disabled'} data-up="${u.id}">Comprar</button></div>`;
+        cs.appendChild(div);
+      });
+
+      const as = document.getElementById('autoShop'); as.innerHTML='';
+      autos.forEach(a=>{
+        const owned = state.buildings[a.id]||0;
+        const price = Math.ceil(a.base * Math.pow(1.15, owned));
+        const div = document.createElement('div'); div.className='item'+(state.potatoes>=price?'':' lock');
+        div.innerHTML = `<div class="icon">${a.icon}</div><div class="meta"><div class="name">${a.name} <span class="badge">x${owned}</span></div><div class="desc">${a.desc}</div><div class="row"><div>+${a.cps} bat/s cada</div><div>Preço: ${fmt(price)}</div></div></div><div><button ${state.potatoes>=price?'':'disabled'} data-buy="${a.id}">Comprar</button></div>`;
+        as.appendChild(div);
+      });
+
+      // attach handlers
+      cs.querySelectorAll('[data-up]').forEach(btn=> btn.addEventListener('click', ()=>{
+        const id = btn.getAttribute('data-up'); const up = clickUpgrades.find(x=>x.id===id);
+        if(state.potatoes>=up.cost){ state.potatoes-=up.cost; up.effect(); state.upgradesBought[id]=true; renderAll(); log('Upgrade comprado: '+up.name); }
+      }));
+
+      as.querySelectorAll('[data-buy]').forEach(btn=> btn.addEventListener('click', ()=>{
+        const id = btn.getAttribute('data-buy'); const def = autos.find(x=>x.id===id);
+        const owned = state.buildings[id]||0; const price = Math.ceil(def.base * Math.pow(1.15, owned));
+        if(state.potatoes>=price){ state.potatoes-=price; state.buildings[id]=(state.buildings[id]||0)+1; renderAll(); log('Comprado: '+def.name); }
+      }));
+    }
+
+    function totalCPS(){ let cps=0; autos.forEach(a=>{ cps += (state.buildings[a.id]||0) * a.cps; }); return cps; }
+
+    function renderAll(){ document.getElementById('potatoes').textContent = fmt(state.potatoes); document.getElementById('rate').textContent = fmt(totalCPS()) + '/s'; document.getElementById('perClick').textContent = '+'+fmt(state.perClick); renderShops(); renderAchievements(); }
+
+    const achievements = [ {id:'first',name:'Primeira batata', cond:()=>state.totalPotatoes>=1}, {id:'hund',name:'100 batatas', cond:()=>state.totalPotatoes>=100}, {id:'builder',name:'Construtor', cond:()=>Object.values(state.buildings).reduce((a,b)=>a+b,0)>=5} ];
+    function renderAchievements(){ const el=document.getElementById('achievements'); el.innerHTML=''; achievements.forEach(a=>{ if(a.cond()){ const s=document.createElement('div'); s.className='badge'; s.textContent='🏆 '+a.name; el.appendChild(s); } }); }
+
+    // interactions
+    potatoBtn.addEventListener('click', (e)=>{ state.potatoes += state.perClick; state.totalPotatoes += state.perClick; spawnFloating('+'+fmt(state.perClick)); renderAll(); });
+
+    function spawnFloating(text){ const f = document.createElement('div'); f.className='floating'; f.style.left = (50 + (Math.random()*20-10)) + '%'; f.style.top = (30 + Math.random()*10) + '%'; f.textContent = text; floatLayer.appendChild(f); setTimeout(()=>f.remove(),900); }
+
+    // auto tick
+    setInterval(()=>{ const gain = totalCPS(); if(gain>0){ state.potatoes += gain; state.totalPotatoes += gain; renderAll(); } }, 1000);
+
+    // keyboard accessibility
+    document.addEventListener('keydown', (e)=>{ if(e.code==='Space'){ e.preventDefault(); potatoBtn.click(); } });
+
+    // init
+    renderAll(); log('Jogo iniciado — versão para site (sem salvar).');
+  </script>
+</body>
+</html>
