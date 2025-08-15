@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Batata Clicker 🥔</title>
+  <style>
+    :root{--bg:#0f172a;--panel:#111827;--card:#1f2937;--muted:#94a3b8;--txt:#e5e7eb;--accent:#f59e0b;--accent-2:#22c55e;--accent-3:#38bdf8;--danger:#ef4444;}
+    *{box-sizing:border-box} html,body{height:100%} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,"Helvetica Neue",Arial,"Apple Color Emoji","Segoe UI Emoji"; background:radial-gradient(1200px 700px at 20% -10%,#1e293b 0%,var(--bg) 60%); color:var(--txt);}
+    .app{display:grid; grid-template-columns:1.2fr 1fr 1fr; gap:16px; padding:16px; max-width:1200px; margin:0 auto} @media (max-width:980px){.app{grid-template-columns:1fr; padding:12px}}
+    .panel{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0)); border:1px solid rgba(255,255,255,.06); border-radius:16px; box-shadow:0 10px 25px rgba(0,0,0,.35); padding:16px;}
+    .header{display:flex; align-items:center; justify-content:space-between; gap:12px;}
+    .title{font-size:clamp(20px,3vw,28px); font-weight:800; letter-spacing:.5px}
+    .sub{color:var(--muted); font-size:13px}
+    .stats{display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-top:12px}
+    .stat{background:var(--card); border-radius:12px; padding:12px; text-align:center;}
+    .stat .v{font-weight:800; font-size:clamp(18px,3vw,24px)}
+    .stat .k{color:var(--muted); font-size:12px}
+    .game-area{display:grid; grid-template-columns: 1fr; place-items:center; padding:12px; position:relative;}
+    .potato-btn{width:min(56vw,360px); height:min(56vw,360px); border-radius:999px; border:none; cursor:pointer; position:relative; isolation:isolate; background: radial-gradient(120px 160px at 65% 35%, rgba(0,0,0,.25), rgba(0,0,0,0) 60%), radial-gradient(90px 120px at 35% 65%, rgba(255,255,255,.08), rgba(255,255,255,0) 65%), radial-gradient(closest-side, #b45309, #92400e); box-shadow: inset 0 10px 20px rgba(0,0,0,.35), 0 20px 40px rgba(0,0,0,.45), 0 0 0 6px rgba(0,0,0,.2); color:#fff; font-size:72px; transition: transform .06s ease-out, filter .06s ease-out;}
+    .potato-btn:hover{ transform: translateY(-2px) scale(1.02)} .potato-btn:active{ transform: scale(.97)}
+    .potato-face{ position:absolute; inset:auto; left:50%; top:52%; transform:translate(-50%,-50%); font-size:64px; filter: drop-shadow(0 2px 2px rgba(0,0,0,.5)); user-select:none}
+    .floating{ position:absolute; left:50%; transform:translateX(-50%); font-weight:800; pointer-events:none; opacity:0; animation:pop .9s ease-out forwards }
+    @keyframes pop{ 0%{opacity:0; transform:translate(-50%, -8px) scale(.9)} 20%{opacity:1} 100%{opacity:0; transform:translate(-50%,-60px) scale(1)} }
+    .shop{display:flex; flex-direction:column; gap:8px;}
+    .item{display:flex; gap:12px; align-items:center; background:var(--card); border-radius:12px; padding:10px; border:1px solid rgba(255,255,255,.06)}
+    .item.lock{opacity:.6; filter:grayscale(20%)}
+    .item .icon{font-size:22px}
+    .item .meta{flex:1}
+    .item .meta .name{font-weight:700}
+    .item .meta .desc{font-size:12px; color:var(--muted)}
+    .item .meta .row{display:flex; gap:10px; font-size:12px; margin-top:4px}
+    .item button{background:var(--accent); border:none; color:#1f2937; font-weight:900; border-radius:10px; padding:8px 10px; cursor:pointer}
+    .item button:disabled{opacity:.5; cursor:not-allowed}
+    .controls{display:flex; flex-wrap:wrap; gap:8px}
+    .btn{background:#111827; color:var(--txt); border:1px solid rgba(255,255,255,.08); padding:8px 10px; border-radius:10px; cursor:pointer}
+    .btn:hover{border-color:rgba(255,255,255,.2)}
+    .ach{display:flex; flex-wrap:wrap; gap:8px}
+    .badge{background:var(--panel); border:1px dashed rgba(255,255,255,.12); border-radius:999px; padding:6px 10px; font-size:12px}
+    .log{height:140px; overflow:auto; background:var(--panel); border:1px solid rgba(255,255,255,.06); border-radius:12px; padding:8px; font-size:12px; color:var(--muted)}
+    .footer{opacity:.7; font-size:12px; text-align:center; margin-top:8px}
+    a{color:var(--accent-3)}
+    .golden{position:absolute; font-size:48px; cursor:pointer; animation:pop .5s ease-out forwards; user-select:none}
+    .event-banner{margin-top:8px; padding:8px 10px; border-radius:10px; background:rgba(250,204,21,.12); border:1px solid rgba(250,204,21,.35); font-size:12px}
+    .missions{display:flex; flex-direction:column; gap:8px}
+    .mission{background:var(--card); border-radius:12px; padding:10px; border:1px solid rgba(255,255,255,.06)}
+    .m-top{display:flex; align-items:center; justify-content:space-between; gap:8px}
+    .m-name{font-weight:700}
+    .m-desc{color:var(--muted); font-size:12px}
+    .bar{width:100%; height:8px; background:#0b1220; border-radius:999px; overflow:hidden; border:1px solid rgba(255,255,255,.06); margin-top:6px}
+    .bar > div{height:100%; background:linear-gradient(90deg,var(--accent),#fbbf24); width:0%}
+    .claim{margin-top:8px; background:var(--accent-2); color:#102a16; border:none; padding:6px 10px; border-radius:8px; font-weight:800; cursor:pointer}
+    .claim:disabled{opacity:.6; cursor:not-allowed}
+    .dim{opacity:.6}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="panel" id="col-game">
+      <div class="header">
+        <div>
+          <div class="title">Batata Clicker <span aria-hidden>🥔</span></div>
+          <div class="sub">Clique, evolua, cumpra missões e ative Prestige para multiplicar a produção!</div>
+        </div>
+        <div class="controls">
+          <button class="btn" id="resetBtn">🗑️ Reset</button>
+          <button class="btn" id="prestigeBtn">✨ Prestige</button>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="v" id="potatoes">0</div><div class="k">Batatas</div></div>
+        <div class="stat"><div class="v" id="rate">0/s</div><div class="k">Produção</div></div>
+        <div class="stat"><div class="v" id="perClick">+1</div><div class="k">Por clique</div></div>
+        <div class="stat"><div class="v" id="prestigeLevel">x1</div><div class="k">Prestige</div></div>
+        <div class="stat"><div class="v" id="dayStr">—</div><div class="k">Missões</div></div>
+      </div>
+      <div class="game-area">
+        <button id="potatoBtn" class="potato-btn" aria-label="Colher batata"><div class="potato-face">🥔</div></button>
+        <div id="floatLayer" style="position:absolute; inset:0; pointer-events:none"></div>
+      </div>
+      <div id="eventBanner" class="event-banner" style="display:none"></div>
+      <div class="ach" id="achievements"></div>
+    </section>
+
+    <section class="panel">
+      <h2 style="margin-top:0">Upgrades de Clique</h2>
+      <div class="shop" id="clickShop"></div>
+      <h2 style="margin-top:12px">Missões do Dia</h2>
+      <div class="missions" id="missions"></div>
+    </section>
+
+    <section class="panel">
+      <h2 style="margin-top:0">Produção Automática</h2>
+      <div class="shop" id="autoShop"></div>
+      <h3 style="margin-top:14px">Registro</h3>
+      <div id="log" class="log"></div>
+      <div class="footer">Feito com ❤️ — Prestige, eventos, missões e salvamento automático.</div>
+    </section>
+  </div>
+
+  <script>
+    // ===== Helpers
+    const fmt = n => { if(!isFinite(n)) return '∞'; const abs=Math.abs(n); if(abs>=1e12)return(n/1e12).toFixed(2)+'T'; if(abs>=1e9)return(n/1e9).toFixed(2)+'B'; if(abs>=1e6)return(n/1e6).toFixed(2)+'M'; if(abs>=1e3)return Math.floor(n).toString()+'k'; return Math.floor(n).toString(); };
+    const log = msg => { const el = document.getElementById('log'); const line=document.createElement('div'); line.textContent=\`[\${new Date().toLocaleTimeString()}] \${msg}\`; el.prepend(line); };
+    const todayKey = () => new Date().toISOString().slice(0,10);
+
+    // ===== Estado
+    let state = JSON.parse(localStorage.getItem('batataSaveV2')) || {
+      potatoes: 0, totalPotatoes: 0, perClick: 1,
+      prestige: 0, prestigeMult: 1,
+      buildings: {}, upgradesBought: {},
+      stats: { clicks:0, buildings:0, upgrades:0, producedToday:0 },
+      temp: { cpsMult:1, clickMult:1, priceMult:1, until: {} },
+      missions: [], lastDaily: null
+    };
+
+    // ===== Definições
+    const clickUpgrades = [
+      { id:'hoe', name:'Enxada', baseCost:50, baseBonus:1, desc:'Aumenta por clique' },
+      { id:'glove', name:'Luvas', baseCost:200, baseBonus:3, desc:'Aumenta por clique' },
+      { id:'tractorHand', name:'Mão de Ferro', baseCost:1000, baseBonus:8, desc:'Clique reforçado' }
+    ];
+    const autos = [
+      { id:'harvester', name:'Colheitadeira', base:15, cps:1, icon:'🚜', desc:'Colhe sozinho' },
+      { id:'farm', name:'Fazenda', base:100, cps:5, icon:'🌾', desc:'Produção em larga escala' },
+      { id:'plant', name:'Plantação', base:1100, cps:20, icon:'🏭', desc:'Produção industrial' },
+      { id:'city', name:'Agro-Cidade', base:12000, cps:100, icon:'🏙️', desc:'Mega produção' }
+    ];
+    const achievements = [
+      {id:'first',name:'Primeira batata', cond:()=>state.totalPotatoes>=1},
+      {id:'hund',name:'100 batatas', cond:()=>state.totalPotatoes>=100},
+      {id:'builder',name:'Construtor', cond:()=>Object.values(state.buildings).reduce((a,b)=>a+b,0)>=5}
+    ];
+
+    // ===== Missões
+    function genDailyMissions(){
+      const base = Math.max(100, Math.floor(state.totalPotatoes*0.1));
+      return [
+        { id:'m1', type:'produce', name:'Produzir batatas', desc:'Produza batatas hoje', target: base, progress:0, reward:{potatoes: Math.ceil(base*0.5)}, done:false, claimed:false },
+        { id:'m2', type:'clicks', name:'Cliques vigorosos', desc:'Clique na batata', target: Math.max(50, Math.floor((state.stats.clicks%500)+150)), progress:0, reward:{perClick:+1}, done:false, claimed:false },
+        { id:'m3', type:'buy', name:'Expansão agrícola', desc:'Compre prédios', target: 5, progress:0, reward:{boostCPS:{mult:1.5, secs:30}}, done:false, claimed:false }
+      ];
+    }
+    function ensureDaily(){
+      const key = todayKey();
+      if(state.lastDaily !== key){
+        state.missions = genDailyMissions();
+        state.stats.producedToday = 0;
+        state.lastDaily = key;
+        log('Novas missões diárias disponíveis!');
+      }
+      document.getElementById('dayStr').textContent = state.lastDaily || '—';
+    }
+    function progressMission(type, amount=1){
+      state.missions.forEach(m=>{
+        if(m.type===type && !m.done){
+          m.progress = Math.min(m.target, m.progress + amount);
+          if(m.progress>=m.target){ m.done=true; log('Missão completa: '+m.name); }
+        }
+      });
+      renderMissions();
+    }
+    function claimMission(m){
+      if(!m.done || m.claimed) return;
+      if(m.reward.potatoes){ state.potatoes += m.reward.potatoes; log(\`Recompensa: +\${fmt(m.reward.potatoes)} batatas\`); }
+      if(m.reward.perClick){ state.perClick += m.reward.perClick; log(\`Recompensa: +\${m.reward.perClick} por clique (permanente)\`); }
+      if(m.reward.boostCPS){ activateTemp('cpsMult', m.reward.boostCPS.mult, m.reward.boostCPS.secs, 'Turbo de Produção ativo!'); }
+      m.claimed = true;
+      renderAll();
+    }
+
+    // ===== Render UI
+    function renderShops(){
+      const cs = document.getElementById('clickShop'); cs.innerHTML='';
+      clickUpgrades.forEach(u=>{
+        const level = state.upgradesBought[u.id]||0;
+        const cost = Math.ceil(u.baseCost * Math.pow(1.5, level) * state.temp.priceMult);
+        const bonus = u.baseBonus;
+        const div = document.createElement('div');
+        div.className='item'+(state.potatoes>=cost?'':' lock');
+        div.innerHTML = \`<div class="icon">⚒️</div><div class="meta"><div class="name">\${u.name} Nv.\${level}</div><div class="desc">\${u.desc}</div><div class="row"><div>+\${bonus} por clique</div><div>Preço: \${fmt(cost)}</div></div></div><div><button \${state.potatoes>=cost?'':'disabled'} data-up="\${u.id}">Comprar</button></div>\`;
+        cs.appendChild(div);
+      });
+      const as = document.getElementById('autoShop'); as.innerHTML='';
+      autos.forEach(a=>{
+        const owned = state.buildings[a.id]||0;
+        const price = Math.ceil(a.base * Math.pow(1.15, owned) * state.temp.priceMult);
+        const div = document.createElement('div'); div.className='item'+(state.potatoes>=price?'':' lock');
+        div.innerHTML = \`<div class="icon">\${a.icon}</div><div class="meta"><div class="name">\${a.name} <span class="badge">x\${owned}</span></div><div class="desc">\${a.desc}</div><div class="row"><div>+\${a.cps} bat/s cada</div><div>Preço: \${fmt(price)}</div></div></div><div><button \${state.potatoes>=price?'':'disabled'} data-buy="\${a.id}">Comprar</button></div>\`;
+        as.appendChild(div);
+      });
+      cs.querySelectorAll('[data-up]').forEach(btn=> btn.addEventListener('click', ()=>{
+        const id = btn.getAttribute('data-up'); const up = clickUpgrades.find(x=>x.id===id);
+        const level = state.upgradesBought[id]||0;
+        const cost = Math.ceil(up.baseCost * Math.pow(1.5, level) * state.temp.priceMult);
+        if(state.potatoes>=cost){ state.potatoes-=cost; state.perClick += up.baseBonus; state.upgradesBought[id]=(level+1); state.stats.upgrades++; log('Upgrade comprado: '+up.name+' Nv.'+(level+1)); renderAll(); progressMission('buy',1); }
+      }));
+      as.querySelectorAll('[data-buy]').forEach(btn=> btn.addEventListener('click', ()=>{
+        const id = btn.getAttribute('data-buy'); const def = autos.find(x=>x.id===id);
+        const owned = state.buildings[id]||0; const price = Math.ceil(def.base * Math.pow(1.15, owned) * state.temp.priceMult);
+        if(state.potatoes>=price){ state.potatoes-=price; state.buildings[id]=(owned+1); state.stats.buildings++; log('Comprado: '+def.name); renderAll(); progressMission('buy',1); }
+      }));
+    }
+    function totalCPS(){ let cps=0; autos.forEach(a=>{ cps += (state.buildings[a.id]||0) * a.cps; }); return cps * state.prestigeMult * state.temp.cpsMult; }
+    function renderAchievements(){ const el=document.getElementById('achievements'); el.innerHTML=''; achievements.forEach(a=>{ if(a.cond()){ const s=document.createElement('div'); s.className='badge'; s.textContent='🏆 '+a.name; el.appendChild(s); } }); }
+    function renderMissions(){
+      const box=document.getElementById('missions'); box.innerHTML='';
+      state.missions.forEach(m=>{
+        const wrap=document.createElement('div'); wrap.className='mission'+(m.claimed?' dim':'');
+        const pct = Math.min(100, Math.floor((m.progress/m.target)*100));
+        wrap.innerHTML = \`
+          <div class="m-top"><div class="m-name">\${m.name}</div><div>\${pct}%</div></div>
+          <div class="m-desc">\${m.desc}: \${fmt(m.progress)} / \${fmt(m.target)}</div>
+          <div class="bar"><div style="width:\${pct}%"></div></div>
+          <button class="claim" \${(m.done && !m.claimed)?'':'disabled'}>Resgatar</button>
+        \`;
+        wrap.querySelector('.claim').addEventListener('click', ()=>{ claimMission(m); renderMissions(); });
+        box.appendChild(wrap);
+      });
+    }
+    function renderAll(){
+      document.getElementById('potatoes').textContent = fmt(state.potatoes);
+      document.getElementById('rate').textContent = fmt(totalCPS()) + '/s';
+      document.getElementById('perClick').textContent = '+'+fmt(Math.floor(state.perClick*state.prestigeMult*state.temp.clickMult));
+      document.getElementById('prestigeLevel').textContent = 'x'+state.prestigeMult.toFixed(2);
+      document.getElementById('dayStr').textContent = state.lastDaily || '—';
+      renderShops(); renderAchievements(); renderMissions(); saveGame();
+    }
+    function spawnFloating(text){ const f = document.createElement('div'); f.className='floating'; f.style.left = (50 + (Math.random()*20-10)) + '%'; f.style.top = (30 + Math.random()*10) + '%'; f.textContent = text; floatLayer.appendChild(f); setTimeout(()=>f.remove(),900); }
+
+    // ===== Interações
+    const potatoBtn = document.getElementById('potatoBtn');
+    const floatLayer = document.getElementById('floatLayer');
+    const banner = document.getElementById('eventBanner');
+
+    potatoBtn.addEventListener('click', ()=>{
+      const gain = state.perClick * state.prestigeMult * state.temp.clickMult;
+      state.potatoes += gain; state.totalPotatoes += gain; state.stats.clicks += 1; state.stats.producedToday += gain;
+      spawnFloating('+'+fmt(gain)); renderAll(); progressMission('clicks',1); progressMission('produce', gain);
+    });
+
+    // ===== Loop de produção
+    setInterval(()=>{
+      const gain = totalCPS();
+      if(gain>0){ state.potatoes += gain; state.totalPotatoes += gain; state.stats.producedToday += gain; renderAll(); progressMission('produce', gain); }
+      // expirar boosts
+      for(const k in state.temp.until){
+        if(Date.now() > state.temp.until[k]){
+          if(k==='cpsMult') state.temp.cpsMult = 1;
+          if(k==='clickMult') state.temp.clickMult = 1;
+          if(k==='priceMult') state.temp.priceMult = 1;
+          delete state.temp.until[k];
+          banner.style.display='none';
+          log('Efeito temporário acabou.');
+        }
+      }
+    }, 1000);
+
+    // ===== Controles
+    document.getElementById('resetBtn').addEventListener('click', ()=>{
+      if(confirm('Resetar o jogo (mantém Prestige)?')){
+        const prestige = state.prestige; const mult = state.prestigeMult;
+        state = { potatoes:0,totalPotatoes:0,perClick:1,prestige,prestigeMult:mult,buildings:{},upgradesBought:{},stats:{clicks:0,buildings:0,upgrades:0,producedToday:0},temp:{cpsMult:1,clickMult:1,priceMult:1,until:{}},missions:[], lastDaily:null };
+        ensureDaily(); renderAll(); saveGame(); log('Jogo resetado.');
+      }
+    });
+    document.getElementById('prestigeBtn').addEventListener('click', ()=>{
+      const need = 2000 * (1 + state.prestige); // escala leve
+      if(state.totalPotatoes>=need){
+        state.prestige++; state.prestigeMult = 1 + state.prestige*0.15;
+        const keep = { prestige:state.prestige, prestigeMult:state.prestigeMult };
+        state = { potatoes:0,totalPotatoes:0,perClick:1,prestige:keep.prestige,prestigeMult:keep.prestigeMult,buildings:{},upgradesBought:{},stats:{clicks:0,buildings:0,upgrades:0,producedToday:0},temp:{cpsMult:1,clickMult:1,priceMult:1,until:{}},missions:[], lastDaily:null };
+        ensureDaily(); renderAll(); log('Prestige ativado! Multiplicador agora x'+state.prestigeMult.toFixed(2));
+      } else {
+        alert('Precisa de '+fmt(need)+' batatas totais para Prestige!');
+      }
+    });
+
+    // ===== Salvamento
+    function saveGame(){ localStorage.setItem('batataSaveV2', JSON.stringify(state)); }
+    window.addEventListener('beforeunload', saveGame);
+
+    // ===== Eventos aleatórios (múltiplos)
+    function bannerMsg(msg){ banner.textContent = msg; banner.style.display='block'; setTimeout(()=>{banner.style.display='none';}, 6000); }
+    function activateTemp(key, mult, secs, message){
+      state.temp[key] = mult;
+      state.temp.until[key] = Date.now() + secs*1000;
+      bannerMsg(message + ' ('+secs+'s)');
+      renderAll();
+    }
+    function spawnGolden(){
+      const gold=document.createElement('div');
+      gold.className='golden'; gold.textContent='🥇';
+      gold.style.left=(10+Math.random()*80)+'%'; gold.style.top=(20+Math.random()*50)+'%';
+      gold.style.position='fixed'; gold.style.zIndex='9999';
+      gold.onclick=()=>{
+        const bonus = Math.max(100, Math.floor(state.totalPotatoes*0.03));
+        state.potatoes+=bonus; log('Batata Dourada! +' + fmt(bonus)); gold.remove(); renderAll();
+      };
+      document.body.appendChild(gold); setTimeout(()=>gold.remove(),5000);
+    }
+    function potatoRain(){ activateTemp('clickMult', 2, 10, '🌧️ Chuva de batatas! Cliques x2'); }
+    function superHarvest(){ const bonus = Math.floor(totalCPS()*20); if(bonus>0){ state.potatoes+=bonus; log('🌟 Super Colheita! +' + fmt(bonus)); renderAll(); } }
+    function thief(){ const loss = Math.max(25, Math.floor(state.potatoes*0.05)); state.potatoes=Math.max(0, state.potatoes-loss); log('🕵️ Ladrão de batatas! -'+fmt(loss)); renderAll(); }
+    function magicFertilizer(){ activateTemp('cpsMult', 2, 15, '🧪 Fertilizante mágico! Produção x2'); }
+    function marketSale(){ activateTemp('priceMult', 0.8, 20, '🛒 Promoção no mercado! Preços -20%'); }
+
+    const eventPool = [
+      {id:'gold', fn:spawnGolden, p:0.30},
+      {id:'rain', fn:potatoRain, p:0.20},
+      {id:'super', fn:superHarvest, p:0.20},
+      {id:'thief', fn:thief, p:0.12},
+      {id:'fert', fn:magicFertilizer, p:0.12},
+      {id:'sale', fn:marketSale, p:0.06}
+    ];
+    function rollEvent(){
+      const r = Math.random();
+      let acc=0;
+      for(const e of eventPool){
+        acc+=e.p;
+        if(r<=acc){ e.fn(); break; }
+      }
+    }
+    setInterval(()=>{
+      if(Math.random()<0.4){ rollEvent(); }
+    }, 8000);
+
+    // ===== Init
+    ensureDaily();
+    renderAll();
+    log('Jogo iniciado.');
+  </script>
+</body>
+</html>
